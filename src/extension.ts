@@ -4,12 +4,16 @@ import { time } from 'console';
 import path from 'path';
 import * as vscode from 'vscode';
 import { GenerativeModel, GoogleGenerativeAI } from "@google/generative-ai";
+import * as sound from 'sound-play';
+import { randomInt } from 'crypto';
 
 
 let userName = '';
 let apiKey = '';
 let warnings = 0;
+let keys = 0;
 let isGeneratingError = false;
+let absoulte = "";
 
 let genAI = undefined;
 let model: GenerativeModel;
@@ -24,36 +28,36 @@ export async function activate(context: vscode.ExtensionContext) {
 	// This line of code will only be executed once when your extension is activated
 
 	setInterval(DocumentDetectErrors, 500);
-	
-	context.subscriptions.push(vscode.debug.onDidChangeBreakpoints(
-        session => {
-			if(session.added.length > 0){
-				if(warnings >= 5){
-					warnings = 0;
-					let editor = vscode.window.activeTextEditor;
-					if(editor !== undefined){
-						editor.edit((editbuilder: vscode.TextEditorEdit) =>{
-							editbuilder.delete(new vscode.Range(new vscode.Position(0, 0), new vscode.Position(editor.document.lineCount, 0)));
-							editbuilder.insert(new vscode.Position(0, 0), "Where did the code go 😂");
-						});
-					}
+	context.subscriptions.push(vscode.debug.onDidChangeBreakpoints(session => {
+		if(session.added.length > 0){
+			if(warnings >= 5){
+				warnings = 0;
+				let editor = vscode.window.activeTextEditor;
+				if(editor !== undefined){
+					editor.edit((editbuilder: vscode.TextEditorEdit) =>{
+						editbuilder.delete(new vscode.Range(new vscode.Position(0, 0), new vscode.Position(editor.document.lineCount, 0)));
+						sound.play(context.asAbsolutePath("sounds/oof.mp3"));
+						editbuilder.insert(new vscode.Position(0, 0), "Where did the code go 😂");
+					});
 				}
-				else{
-					vscode.window.showWarningMessage("I'm dissapointed that you need a breakpoint, do better");
-					warnings++;
-				}
-			} 
-			else if(session.removed.length > 0){
-				vscode.window.showInformationMessage("You're on the right track, keep it like this and I might not delete your code"); 
-			}      
-        }
-    ));
+			}
+			else{
+				sound.play(context.asAbsolutePath("sounds/fart.mp3"));
+				vscode.window.showWarningMessage("I'm dissapointed that you need a breakpoint, do better");
+				warnings++;
+			}
+		}
+		else if(session.removed.length > 0){
+			vscode.window.showInformationMessage("You're on the right track, keep it like this and I might not delete your code");
+		}
+	}));
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
 	const command1 = vscode.commands.registerCommand('coderoaster.Setup_experience', async () => {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
+		absoulte = context.asAbsolutePath("sounds");
 		vscode.window.showInformationMessage("Setup initiated on " + new Date().toDateString());
 		let response = undefined;
 		if(userName === '' || userName === undefined){
@@ -70,6 +74,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 		}
 		if(userName === '' || userName === undefined){
+			sound.play(context.asAbsolutePath("sounds/vine-boom.mp3"));
 			vscode.window.showErrorMessage("Blud is incapable of typing the name 💀");
 		}
 		else{
@@ -94,11 +99,13 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(command1);
 
 	const command2 = vscode.commands.registerCommand('coderoaster.AttemptOfRestoringCode', () => {
+		sound.play(context.asAbsolutePath("sounds/nope.mp3"));
 		vscode.window.showErrorMessage("I don't feel in the mood of letting you undo the code.");
 	});
 	context.subscriptions.push(command2);
 
 	const command3 = vscode.commands.registerCommand('coderoaster.AttemptOfCompilingCode', () => {
+		sound.play(context.asAbsolutePath("sounds/nope.mp3"));
 		vscode.window.showErrorMessage("For now this is disabled. Find another way to compile I don't care.");
 	});
 	context.subscriptions.push(command3);
@@ -186,6 +193,21 @@ function DocumentDetectErrors(){
 vscode.workspace.onDidCloseTextDocument((document) => {
     // Clear diagnostics when the document is closed to avoid old diagnostics persisting
     diagnosticCollection.delete(document.uri);
+});
+
+let randKey = randomInt(10, 20);
+vscode.workspace.onDidChangeTextDocument(() =>{
+	if(keys === randKey){
+		if(keys % 2 === 0){
+			sound.play(absoulte + "/discord.mp3");
+		}
+		else{
+			sound.play(absoulte + "/bone-crack.mp3");
+		}
+		keys = 0;
+		randKey = randomInt(80, 100);
+	}
+	keys++;
 });
 
 

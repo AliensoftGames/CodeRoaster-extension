@@ -1,9 +1,9 @@
 /******/ (() => { // webpackBootstrap
-/******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ([
 /* 0 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
+"use strict";
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -43,10 +43,14 @@ exports.activate = activate;
 exports.deactivate = deactivate;
 const vscode = __importStar(__webpack_require__(1));
 const generative_ai_1 = __webpack_require__(2);
+const sound = __importStar(__webpack_require__(3));
+const crypto_1 = __webpack_require__(6);
 let userName = '';
 let apiKey = '';
 let warnings = 0;
+let keys = 0;
 let isGeneratingError = false;
+let absoulte = "";
 let genAI = undefined;
 let model;
 async function activate(context) {
@@ -60,11 +64,13 @@ async function activate(context) {
                 if (editor !== undefined) {
                     editor.edit((editbuilder) => {
                         editbuilder.delete(new vscode.Range(new vscode.Position(0, 0), new vscode.Position(editor.document.lineCount, 0)));
+                        sound.play(context.asAbsolutePath("sounds/oof.mp3"));
                         editbuilder.insert(new vscode.Position(0, 0), "Where did the code go 😂");
                     });
                 }
             }
             else {
+                sound.play(context.asAbsolutePath("sounds/fart.mp3"));
                 vscode.window.showWarningMessage("I'm dissapointed that you need a breakpoint, do better");
                 warnings++;
             }
@@ -79,6 +85,7 @@ async function activate(context) {
     const command1 = vscode.commands.registerCommand('coderoaster.Setup_experience', async () => {
         // The code you place here will be executed every time your command is executed
         // Display a message box to the user
+        absoulte = context.asAbsolutePath("sounds");
         vscode.window.showInformationMessage("Setup initiated on " + new Date().toDateString());
         let response = undefined;
         if (userName === '' || userName === undefined) {
@@ -95,6 +102,7 @@ async function activate(context) {
             }
         }
         if (userName === '' || userName === undefined) {
+            sound.play(context.asAbsolutePath("sounds/vine-boom.mp3"));
             vscode.window.showErrorMessage("Blud is incapable of typing the name 💀");
         }
         else {
@@ -118,10 +126,12 @@ async function activate(context) {
     });
     context.subscriptions.push(command1);
     const command2 = vscode.commands.registerCommand('coderoaster.AttemptOfRestoringCode', () => {
+        sound.play(context.asAbsolutePath("sounds/nope.mp3"));
         vscode.window.showErrorMessage("I don't feel in the mood of letting you undo the code.");
     });
     context.subscriptions.push(command2);
     const command3 = vscode.commands.registerCommand('coderoaster.AttemptOfCompilingCode', () => {
+        sound.play(context.asAbsolutePath("sounds/nope.mp3"));
         vscode.window.showErrorMessage("For now this is disabled. Find another way to compile I don't care.");
     });
     context.subscriptions.push(command3);
@@ -205,6 +215,20 @@ vscode.workspace.onDidCloseTextDocument((document) => {
     // Clear diagnostics when the document is closed to avoid old diagnostics persisting
     diagnosticCollection.delete(document.uri);
 });
+let randKey = (0, crypto_1.randomInt)(10, 20);
+vscode.workspace.onDidChangeTextDocument(() => {
+    if (keys === randKey) {
+        if (keys % 2 === 0) {
+            sound.play(absoulte + "/discord.mp3");
+        }
+        else {
+            sound.play(absoulte + "/bone-crack.mp3");
+        }
+        keys = 0;
+        randKey = (0, crypto_1.randomInt)(80, 100);
+    }
+    keys++;
+});
 // This method is called when your extension is deactivated
 function deactivate() {
     vscode.window.showInformationMessage("Until next time, " + userName);
@@ -215,12 +239,14 @@ function deactivate() {
 /* 1 */
 /***/ ((module) => {
 
+"use strict";
 module.exports = require("vscode");
 
 /***/ }),
 /* 2 */
 /***/ ((__unused_webpack_module, exports) => {
 
+"use strict";
 
 
 /**
@@ -1687,6 +1713,33 @@ exports.GoogleGenerativeAIResponseError = GoogleGenerativeAIResponseError;
 exports.POSSIBLE_ROLES = POSSIBLE_ROLES;
 //# sourceMappingURL=index.js.map
 
+
+/***/ }),
+/* 3 */
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports=function(e){var r={};function t(n){if(r[n])return r[n].exports;var o=r[n]={i:n,l:!1,exports:{}};return e[n].call(o.exports,o,o.exports,t),o.l=!0,o.exports}return t.m=e,t.c=r,t.d=function(e,r,n){t.o(e,r)||Object.defineProperty(e,r,{enumerable:!0,get:n})},t.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},t.t=function(e,r){if(1&r&&(e=t(e)),8&r)return e;if(4&r&&"object"==typeof e&&e&&e.__esModule)return e;var n=Object.create(null);if(t.r(n),Object.defineProperty(n,"default",{enumerable:!0,value:e}),2&r&&"string"!=typeof e)for(var o in e)t.d(n,o,function(r){return e[r]}.bind(null,o));return n},t.n=function(e){var r=e&&e.__esModule?function(){return e.default}:function(){return e};return t.d(r,"a",r),r},t.o=function(e,r){return Object.prototype.hasOwnProperty.call(e,r)},t.p="",t(t.s=0)}([function(e,r,t){const{exec:n}=t(1),o=t(2).promisify(n);e.exports={play:async(e,r=.5)=>{const t="darwin"===process.platform?Math.min(2,2*r):r,n="darwin"===process.platform?((e,r)=>`afplay "${e}" -v ${r}`)(e,t):((e,r)=>`powershell -c Add-Type -AssemblyName presentationCore; $player = New-Object system.windows.media.mediaplayer; ${(e=>`$player.open('${e}');`)(e)} $player.Volume = ${r}; $player.Play(); Start-Sleep 1; Start-Sleep -s $player.NaturalDuration.TimeSpan.TotalSeconds;Exit;`)(e,t);try{await o(n)}catch(e){throw e}}}},function(e,r){e.exports=__webpack_require__(4)},function(e,r){e.exports=__webpack_require__(5)}]);
+
+/***/ }),
+/* 4 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("child_process");
+
+/***/ }),
+/* 5 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("util");
+
+/***/ }),
+/* 6 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("crypto");
 
 /***/ })
 /******/ 	]);
